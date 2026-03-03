@@ -5,6 +5,9 @@ from app.core.security import Security
 
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        if request.method == "OPTIONS":
+            return await call_next(request)
+            
         public_paths = ["/api/v1/auth", "/docs", "/redoc", "/openapi.json", "/favicon.ico"]
         
         if any(request.url.path.startswith(path) for path in public_paths):
