@@ -1,26 +1,35 @@
 # AI-Powered Interview Preparation Platform
 
-A full-stack platform designed to help users prepare for technical interviews through AI-generated questions, real-time feedback, and progress tracking.
+A high-performance, full-stack monorepo designed to revolutionize technical interview preparation. Leveraging state-of-the-art AI, this platform provides dynamic mock sessions, real-time feedback, and a premium user experience.
 
-## Features
-- **Authentication**: Secure JWT-based access and refresh token flow (bypassing passlib limits).
-- **Interactive Dashboard**: Track your overall progress, scores, and topics using dynamic React Recharts.
-- **Daily Challenges**: Complete a daily interview question to maintain your streak and earn points.
-- **Custom Interviews**: Generate on-demand mock interviews (General, HR, Coding, System Design) powered by DeepSeek AI.
-- **History Tracking**: Review past answers and scores with paginated interview history.
+## 🚀 Key Features
 
-## Tech Stack
-- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, Material-UI, Redux Toolkit, React Hook Form, Axios.
-- **Backend**: FastAPI, Python 3.13, SQLAlchemy, PostgreSQL/SQLite, JWT Authentication, bcrypt.
-- **AI Integration**: DeepSeek Chat API.
+- **Real-time Notification System**: Stay informed with instant "pusher" toasts and a persistent notification menu managing your 10 most recent updates.
+- **AI Mock Interview Sessions**: Participate in stateful, dynamic interview simulations. Our AI persona adapts to your responses and provides a comprehensive technical/behavioral scorecard.
+- **Premium UI/UX**: Experience a modern SaaS interface featuring advanced glassmorphism, vibrant color palettes, fluid micro-animations, and a global loading state.
+- **Interactive Dashboard**: Track your growth with real-time data integration and dynamic progress charts powered by Recharts.
+- **Performance Optimized**: Enjoy lightning-fast initial loads thanks to `React.lazy` code-splitting and optimized vendor chunking (< 500kb per chunk).
+- **Secure Authentication**: Robust JWT-based access and refresh token flow for persistent, secure sessions.
+- **Daily Challenges**: Maintain your streak and earn XP with high-intensity technical assessments generated daily.
 
-## Getting Started
+## 🛠️ Tech Stack
 
-Follow these instructions to set up the project on your local machine.
+- **Frontend**: React 19 (Vite), TypeScript, Material-UI 7, Redux Toolkit, Framer Motion, `date-fns`.
+- **Backend**: FastAPI, Python 3.13, SQLAlchemy, PostgreSQL/SQLite, JWT Authentication.
+- **AI Engine**: DeepSeek Chat API.
+
+## 📦 Project Structure
+
+```text
+├── backend/            # FastAPI application, database models, and AI services
+└── frontend/           # React application, Redux store, and premium UI components
+```
+
+## 🏁 Getting Started
 
 ### Prerequisites
 - Node.js (v18 or higher)
-- Python (v3.10 or higher)
+- Python (v3.13 or higher)
 - Git
 
 ### 1. Clone the Repository
@@ -48,7 +57,7 @@ pip install -r requirements.txt
 ```
 
 **Environment Variables:**
-Create a `.env` file in the `backend` directory with the following variables:
+Create a `.env` file in the `backend` directory:
 ```env
 DEEPSEEK_API_KEY=your_deepseek_api_key
 JWT_SECRET=your_super_secret_jwt_key
@@ -65,9 +74,9 @@ uvicorn app.main:app --reload
 
 ### 3. Frontend Setup
 
-Open a new terminal window/tab from the project root.
+Open a new terminal window in the project root.
 
-**For Windows, MacOS, and Linux:**
+**For all platforms:**
 ```bash
 cd frontend
 npm install

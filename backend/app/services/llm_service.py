@@ -1,24 +1,24 @@
-import httpx
+import google.generativeai as genai
 from app.core.config import settings
 
+# Configure the API key globally
+genai.configure(api_key=settings.GEMINI_API_KEY)
+
 class LLMService:
+    models = {
+        "gemini-2.5-flash": genai.GenerativeModel("gemini-2.5-flash"),
+        "gemini-2.5-pro": genai.GenerativeModel("gemini-2.5-pro"),
+        "gemini-2.5-flash-lite": genai.GenerativeModel("gemini-2.5-flash-lite"),
+        "gemini-1.0-pro": genai.GenerativeModel("gemini-1.0-pro"),
+    }
+
     @staticmethod
     async def ask_llm(prompt: str):
-        headers = {
-            "Authorization": f"Bearer {settings.DEEPSEEK_API_KEY}",
-            "Content-Type": "application/json"
-        }
-
-        payload = {
-            "model": "deepseek-chat",
-            "messages": [
-                {"role": "user", "content": prompt}
-            ],
-            "temperature": 0.6
-        }
-
-        async with httpx.AsyncClient() as client:
-            response = await client.post(settings.DEEPSEEK_URL, json=payload, headers=headers)
-
-        data = response.json()
-        return data["choices"][0]["message"]["content"]
+        # We'll default to the free tier 2.5 flash
+        model = LLMService.models["gemini-2.5-flash"]
+        try:
+            response = await model.generate_content_async(prompt)
+            # The .text property extracts the message content
+            return response.text
+        except Exception as e:
+            raise Exception(f"Gemini LLM API Error: {str(e)}")

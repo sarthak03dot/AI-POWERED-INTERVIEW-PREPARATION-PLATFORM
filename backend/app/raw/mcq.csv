@@ -1,0 +1,5 @@
+topic,difficulty,question,options,answer,explanation
+React,medium,What is the purpose of useEffect hook?,"[""To fetch data"", ""To manage state"", ""To handle side effects"", ""To create components""]",To handle side effects,The useEffect hook is used to handle side effects in functional components.
+Python,easy,Which keyword is used to define a function in Python?,[""func"", ""define"", ""def"", ""function""],def,The 'def' keyword is used to start a function definition in Python.
+Data Structures,hard,What is the time complexity of searching in a Balanced Binary Search Tree?,[""O(1)"", ""O(n)"", ""O(log n)"", ""O(n log n)""],O(log n),Searching in a balanced BST takes logarithmic time.
+React,easy,What is the primary purpose of JSX in React?,"[""A) To manage application state"", ""B) To write HTML-like code within JavaScript"", ""C) To handle HTTP requests"", ""D) To define CSS styles for components""]",B) To write HTML-like code within JavaScript,"JSX (JavaScript XML) is a syntax extension that allows developers to write HTML-like code directly within their JavaScript files, making it easier to describe what the UI should look like in React components."

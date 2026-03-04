@@ -27,20 +27,25 @@ class ResumeRequest(BaseModel):
 
 @router.post("/mcq")
 async def mcq_api(body: MCQRequest):
-    return await QuestionService.generate_mcq(body.topic, body.difficulty)
+    reply = await QuestionService.generate_mcq(body.topic, body.difficulty)
+    return {"reply": reply}
 
 @router.post("/coding")
 async def coding_api(body: CodingRequest):
-    return await QuestionService.generate_coding(body.topic, body.difficulty)
+    reply = await QuestionService.generate_coding(body.topic, body.difficulty)
+    return {"reply": reply}
 
 @router.get("/system-design")
 async def system_design_api():
-    return await QuestionService.generate_system_design()
+    reply = await QuestionService.generate_system_design()
+    return {"reply": reply}
 
 @router.get("/hr")
 async def hr_api():
-    return await QuestionService.generate_hr()
+    reply = await QuestionService.generate_hr()
+    return {"reply": reply}
 
 @router.post("/resume")
 async def resume_api(body: ResumeRequest):
-    return await QuestionService.generate_resume_question(body.resume_text)
+    reply = await QuestionService.generate_resume_question(body.resume_text)
+    return {"reply": reply}

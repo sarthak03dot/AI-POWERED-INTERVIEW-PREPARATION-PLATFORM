@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { setLoading } from '../redux/slices/uiSlice';
 
 const BASE_URL = 'http://localhost:8000/api/v1';
 
@@ -9,24 +10,59 @@ export const api = axios.create({
     },
 });
 
+let storeInstance: any = null;
+
+export const setupInterceptors = (store: any) => {
+    storeInstance = store;
+};
+
+// Helper to keep track of active requests to prevent flickering
+let activeRequests = 0;
+
+const startLoading = () => {
+    activeRequests++;
+    if (activeRequests === 1 && storeInstance) {
+        storeInstance.dispatch(setLoading(true));
+    }
+};
+
+const stopLoading = () => {
+    activeRequests--;
+    if (activeRequests <= 0) {
+        activeRequests = 0;
+        if (storeInstance) {
+            storeInstance.dispatch(setLoading(false));
+        }
+    }
+};
+
 // Request Interceptor: Attach JWT Token if available
 api.interceptors.request.use(
     (config) => {
+        // Only show loader for non-GET requests or major GETs
+        // (Optional check: if (config.method !== 'get') startLoading(); )
+        // User asked for "each loading", so we show it for all.
+        startLoading();
+
         const token = localStorage.getItem('token');
-        // Let auth/refresh pass without the default token to rely purely on what's configured locally if needed.
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
     (error) => {
+        stopLoading();
         return Promise.reject(error);
     }
 );
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        stopLoading();
+        return response;
+    },
     async (error) => {
+        stopLoading();
         const originalRequest = error.config;
 
         if (error.response?.status === 401 && !originalRequest._retry) {

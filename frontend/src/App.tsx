@@ -1,60 +1,68 @@
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 import type { RootState } from './redux/store';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import InterviewGenerate from './pages/InterviewGenerate';
-import DailyChallenge from './pages/DailyChallenge';
-import History from './pages/History';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
-import { useDispatch } from 'react-redux';
-import { logout } from './redux/slices/authSlice';
-import { useNavigate } from 'react-router-dom';
+import { getTheme } from './theme/theme';
+import { setLoading } from './redux/slices/uiSlice';
+
+import MainLayout from './components/layout/MainLayout';
+import PublicLayout from './components/layout/PublicLayout';
+import GlobalLoader from './components/GlobalLoader';
+
+// Lazy Load Pages
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const InterviewGenerate = lazy(() => import('./pages/InterviewGenerate'));
+const DailyChallenge = lazy(() => import('./pages/DailyChallenge'));
+const History = lazy(() => import('./pages/History'));
+const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const MockInterview = lazy(() => import('./pages/MockInterview'));
 
 function App() {
-  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { themeMode } = useSelector((state: RootState) => state.ui);
+  const theme = getTheme(themeMode);
+
+  // Handle Initial Load / Refresh
+  useEffect(() => {
+    dispatch(setLoading(true));
+    const timer = setTimeout(() => {
+      dispatch(setLoading(false));
+    }, 1200); // Smooth 1.2s initializing sequence
+    return () => clearTimeout(timer);
+  }, [dispatch]);
 
   return (
-    <>
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static" elevation={0} color="inherit" sx={{ borderBottom: '1px solid #e0e0e0' }}>
-          <Toolbar>
-            <Typography variant="h6" component="div" onClick={() => navigate('/')} sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.main', cursor: 'pointer' }}>
-              InterviewPrep Platform
-            </Typography>
-            {isAuthenticated ? (
-              <>
-                <Button color="inherit" onClick={() => navigate('/')}>Dashboard</Button>
-                <Button color="inherit" onClick={() => navigate('/practice')}>Practice</Button>
-                <Button color="inherit" onClick={() => navigate('/daily')}>Daily Challenge</Button>
-                <Button color="inherit" onClick={() => navigate('/history')} sx={{ mr: 2 }}>History</Button>
-                <Typography variant="body1" sx={{ mr: 2, ml: 2, display: { xs: 'none', md: 'block' } }}>Welcome, {user?.name}</Typography>
-                <Button color="primary" variant="outlined" onClick={() => dispatch(logout())}>Logout</Button>
-              </>
-            ) : (
-              <>
-                <Button color="primary" variant="text" onClick={() => navigate('/login')}>Login</Button>
-                <Button color="primary" variant="contained" onClick={() => navigate('/register')} sx={{ ml: 2 }}>Sign Up</Button>
-              </>
-            )}
-          </Toolbar>
-        </AppBar>
-      </Box>
-
-      <Box sx={{ p: 4, maxWidth: 1200, margin: '0 auto' }}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <GlobalLoader />
+      <Suspense fallback={<GlobalLoader forced />}>
         <Routes>
-          <Route path="/" element={isAuthenticated ? <Home /> : <Navigate to="/login" />} />
-          <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
-          <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" />} />
-          <Route path="/practice" element={isAuthenticated ? <InterviewGenerate /> : <Navigate to="/login" />} />
-          <Route path="/daily" element={isAuthenticated ? <DailyChallenge /> : <Navigate to="/login" />} />
-          <Route path="/history" element={isAuthenticated ? <History /> : <Navigate to="/login" />} />
+          {/* Public Routes */}
+          <Route element={<PublicLayout />}>
+            <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
+            <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" />} />
+          </Route>
+
+          {/* Protected SaaS Routes */}
+          <Route element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/practice" element={<InterviewGenerate />} />
+            <Route path="/daily" element={<DailyChallenge />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/mock-interview" element={<MockInterview />} />
+          </Route>
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-      </Box>
-    </>
+      </Suspense>
+    </ThemeProvider>
   );
 }
 

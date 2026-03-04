@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../redux/slices/authSlice';
 import type { AppDispatch, RootState } from '../redux/store';
 import FormInput from '../components/FormInput';
-import { Box, Button, Typography, Paper, Alert, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, Alert, CircularProgress } from '@mui/material';
 
 type LoginFormInputs = {
     email: string;
@@ -28,40 +28,61 @@ const Login: React.FC = () => {
     };
 
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-            <Paper sx={{ p: 4, width: '100%', maxWidth: 400 }}>
-                <Typography variant="h5" fontWeight="bold" gutterBottom textAlign="center">
-                    Sign In
-                </Typography>
-                {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <Box sx={{ width: '100%' }}>
+            <Typography variant="h4" fontWeight={900} gutterBottom textAlign="center" sx={{ mb: 1, color: 'text.primary' }}>
+                Welcome Back
+            </Typography>
+            <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ mb: 4 }}>
+                Enter your credentials to access your account
+            </Typography>
 
-                <FormProvider {...methods}>
-                    <form onSubmit={methods.handleSubmit(onSubmit)}>
-                        <FormInput
-                            name="email"
-                            label="Email Address"
-                            type="email"
-                            rules={{ required: 'Email is required' }}
-                        />
-                        <FormInput
-                            name="password"
-                            label="Password"
-                            type="password"
-                            rules={{ required: 'Password is required' }}
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            size="large"
-                            sx={{ mt: 3, mb: 2 }}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? <CircularProgress size={24} /> : 'Login'}
-                        </Button>
-                    </form>
-                </FormProvider>
-            </Paper>
+            {error && <Alert severity="error" variant="filled" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
+
+            <FormProvider {...methods}>
+                <form onSubmit={methods.handleSubmit(onSubmit)}>
+                    <FormInput
+                        name="email"
+                        label="Email Address"
+                        type="email"
+                        rules={{ required: 'Email is required' }}
+                    />
+                    <FormInput
+                        name="password"
+                        label="Password"
+                        type="password"
+                        rules={{ required: 'Password is required' }}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        size="large"
+                        sx={{ mt: 3, mb: 3, py: 1.5, borderRadius: 2, fontWeight: 800 }}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
+                    </Button>
+
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                            Don't have an account?{' '}
+                            <Typography
+                                component="span"
+                                variant="body2"
+                                sx={{
+                                    color: 'primary.main',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    '&:hover': { textDecoration: 'underline' }
+                                }}
+                                onClick={() => navigate('/register')}
+                            >
+                                Sign Up
+                            </Typography>
+                        </Typography>
+                    </Box>
+                </form>
+            </FormProvider>
         </Box>
     );
 };

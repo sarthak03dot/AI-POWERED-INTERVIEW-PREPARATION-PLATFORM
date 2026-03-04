@@ -10,6 +10,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
             
         public_paths = ["/api/v1/auth", "/docs", "/redoc", "/openapi.json", "/favicon.ico"]
         
+        # Allow root path exact match
+        if request.url.path == "/":
+            return await call_next(request)
+
         if any(request.url.path.startswith(path) for path in public_paths):
             return await call_next(request)
 
