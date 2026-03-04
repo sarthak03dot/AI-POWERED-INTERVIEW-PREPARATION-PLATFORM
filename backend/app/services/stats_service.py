@@ -22,9 +22,29 @@ class StatsService:
             for t in topic_rows
         ]
 
+        # Get recent activity
+        recent_activity_rows = db.query(QuestionHistory).filter(QuestionHistory.user_id == user_id).order_by(QuestionHistory.created_at.desc()).limit(5).all()
+        recent_activity = [
+            {
+                "topic": r.topic,
+                "type": r.question_type,
+                "correct": r.answer.strip().lower() == r.correct_answer.strip().lower() if r.correct_answer else False,
+                "created_at": r.created_at.isoformat()
+            }
+            for r in recent_activity_rows
+        ]
+
+        # Calculate Interview Readiness Score
+        # Formula: Average accuracy weighted by volume (max 100)
+        avg_accuracy = sum([t["accuracy"] for t in topic_stats]) / len(topic_stats) if topic_stats else 0
+        volume_factor = min(1.0, history_count / 100) # 100 questions for full weight
+        readiness_score = round(float(avg_accuracy * volume_factor), 1)
+
         return {
             "total_score": progress.total_score if progress else 0,
             "challenges_solved": progress.challenges_solved if progress else 0,
             "total_questions_attempted": history_count,
-            "topics": topic_stats
+            "readiness_score": readiness_score,
+            "topics": topic_stats,
+            "recent_activity": recent_activity
         }

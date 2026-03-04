@@ -5,6 +5,10 @@ export const statsService = {
         const response = await api.get('/stats/me');
         return response.data;
     },
+    getLeaderboard: async () => {
+        const response = await api.get('/stats/leaderboard');
+        return response.data;
+    }
 };
 
 export const topicService = {

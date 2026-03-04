@@ -9,16 +9,20 @@ import {
     Tooltip,
     Legend,
     BarElement,
+    RadialLinearScale,
+    Filler,
 } from 'chart.js';
-import { Line, Bar } from 'react-chartjs-2';
-import { Box, Typography, Paper } from '@mui/material';
+import { Line, Bar, Radar } from 'react-chartjs-2';
+import { Box, Typography, Paper, useTheme, alpha } from '@mui/material';
 
 ChartJS.register(
     CategoryScale,
     LinearScale,
+    RadialLinearScale,
     PointElement,
     LineElement,
     BarElement,
+    Filler,
     Title,
     Tooltip,
     Legend
@@ -26,7 +30,7 @@ ChartJS.register(
 
 interface ChartWrapperProps {
     title: string;
-    type: 'line' | 'bar';
+    type: 'line' | 'bar' | 'radar';
     labels: string[];
     dataSets: {
         label: string;
@@ -34,19 +38,78 @@ interface ChartWrapperProps {
         borderColor?: string;
         backgroundColor?: string;
     }[];
+    height?: number | string;
 }
 
-const ChartWrapper: React.FC<ChartWrapperProps> = ({ title, type, labels, dataSets }) => {
-    const options = {
+const ChartWrapper: React.FC<ChartWrapperProps> = ({ title, type, labels, dataSets, height = 350 }) => {
+    const theme = useTheme();
+
+    const options: any = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'top' as const,
+                position: 'bottom' as const,
+                labels: {
+                    color: theme.palette.text.secondary,
+                    font: {
+                        family: 'Inter',
+                        weight: 600,
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                },
             },
-            title: {
-                display: false,
+            tooltip: {
+                backgroundColor: theme.palette.background.paper,
+                titleColor: theme.palette.text.primary,
+                bodyColor: theme.palette.text.secondary,
+                borderColor: theme.palette.divider,
+                borderWidth: 1,
+                padding: 12,
+                boxPadding: 6,
+                usePointStyle: true,
             },
+        },
+        scales: type !== 'radar' ? {
+            x: {
+                grid: {
+                    display: false,
+                },
+                ticks: {
+                    color: theme.palette.text.secondary,
+                    font: { family: 'Inter' }
+                }
+            },
+            y: {
+                grid: {
+                    color: theme.palette.divider,
+                },
+                ticks: {
+                    color: theme.palette.text.secondary,
+                    font: { family: 'Inter' }
+                }
+            },
+        } : {
+            r: {
+                angleLines: {
+                    color: theme.palette.divider,
+                },
+                grid: {
+                    color: theme.palette.divider,
+                },
+                pointLabels: {
+                    color: theme.palette.text.secondary,
+                    font: {
+                        family: 'Outfit',
+                        size: 11,
+                        weight: 600,
+                    }
+                },
+                ticks: {
+                    display: false,
+                }
+            }
         },
     };
 
@@ -54,20 +117,28 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({ title, type, labels, dataSe
         labels,
         datasets: dataSets.map(ds => ({
             ...ds,
-            borderColor: ds.borderColor || '#6366f1',
-            backgroundColor: ds.backgroundColor || 'rgba(99, 102, 241, 0.5)',
+            borderColor: ds.borderColor || theme.palette.primary.main,
+            backgroundColor: ds.backgroundColor || alpha(ds.borderColor || theme.palette.primary.main, 0.2),
             tension: 0.4,
-            borderRadius: type === 'bar' ? 4 : undefined,
+            pointBackgroundColor: ds.borderColor || theme.palette.primary.main,
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: ds.borderColor || theme.palette.primary.main,
+            borderRadius: type === 'bar' ? 8 : undefined,
+            borderWidth: 2,
+            fill: true,
         })),
     };
 
     return (
-        <Paper sx={{ p: 3, borderRadius: 4, height: 400, display: 'flex', flexDirection: 'column' }}>
-            <Typography variant="h6" gutterBottom fontWeight="bold" color="text.secondary">
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 4, height, display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 800, letterSpacing: -0.5, mb: 3 }}>
                 {title}
             </Typography>
-            <Box sx={{ flexGrow: 1, position: 'relative' }}>
-                {type === 'line' ? <Line options={options} data={data} /> : <Bar options={options} data={data} />}
+            <Box sx={{ flexGrow: 1, position: 'relative', minHeight: 0 }}>
+                {type === 'line' && <Line options={options} data={data} />}
+                {type === 'bar' && <Bar options={options} data={data} />}
+                {type === 'radar' && <Radar options={options} data={data} />}
             </Box>
         </Paper>
     );

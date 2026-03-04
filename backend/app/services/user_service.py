@@ -2,6 +2,9 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.core.security import Security
 
+from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException
+
 class UserService:
 
     @staticmethod
@@ -9,9 +12,13 @@ class UserService:
         hashed = Security.hash_password(password)
         user = User(username=username, email=email, password=hashed)
         db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
+        try:
+            db.commit()
+            db.refresh(user)
+            return user
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(status_code=400, detail="Username or email already exists")
 
     @staticmethod
     def authenticate_user(db: Session, email: str, password: str):

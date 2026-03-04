@@ -3,9 +3,19 @@ import { authService } from '../../services/authService';
 
 export const loginUser = createAsyncThunk(
     'auth/login',
-    async (credentials: any, { rejectWithValue }) => {
+    async (credentials: { email: string; password: string }, { rejectWithValue }) => {
         try {
             const response = await authService.login(credentials.email, credentials.password);
+            // Dispatch notification
+            const { addNotification } = await import('./uiSlice');
+            // @ts-ignore - avoid circular import if needed, but thunkAPI dispatch is safe
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (globalThis as any).store?.dispatch(addNotification({
+                title: 'Login Successful',
+                message: `Welcome back, ${credentials.email}!`,
+                type: 'success'
+            }));
+
             // Backend returns: {"access_token": token, "refresh_token": token, "token_type": "bearer"}
             localStorage.setItem('token', response.access_token);
             if (response.refresh_token) {
@@ -16,11 +26,12 @@ export const loginUser = createAsyncThunk(
                 refreshToken: response.refresh_token,
                 email: credentials.email
             };
-        } catch (error: any) {
-            if (error.response && error.response.data) {
-                return rejectWithValue(error.response.data.detail || 'Login failed');
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { detail?: string } }, message: string };
+            if (err.response && err.response.data) {
+                return rejectWithValue(err.response.data.detail || 'Login failed');
             }
-            return rejectWithValue(error.message);
+            return rejectWithValue(err.message);
         }
     }
 );

@@ -1,7 +1,7 @@
 import React from 'react';
 import Select, { type Props as SelectProps } from 'react-select';
 import { useFormContext, Controller } from 'react-hook-form';
-import { FormControl, FormHelperText, InputLabel } from '@mui/material';
+import { alpha, FormControl, FormHelperText, InputLabel, useTheme } from '@mui/material';
 
 type OptionType = {
     value: string;
@@ -16,6 +16,7 @@ type SelectInputProps = {
 
 const SelectInput: React.FC<SelectInputProps> = ({ name, label, options, ...otherProps }) => {
     const { control } = useFormContext();
+    const theme = useTheme();
 
     return (
         <Controller
@@ -23,8 +24,22 @@ const SelectInput: React.FC<SelectInputProps> = ({ name, label, options, ...othe
             name={name}
             defaultValue={null}
             render={({ field: { value, onChange, onBlur, ref }, fieldState }) => (
-                <FormControl fullWidth margin="normal" error={!!fieldState.error} style={{ zIndex: 100 }}>
-                    <InputLabel shrink={true} htmlFor={name} style={{ background: 'white', padding: '0 4px' }}>
+                <FormControl fullWidth margin="normal" error={!!fieldState.error}>
+                    <InputLabel
+                        shrink={true}
+                        htmlFor={name}
+                        sx={{
+                            background: theme.palette.background.paper,
+                            px: 1,
+                            borderRadius: 1,
+                            color: 'text.secondary',
+                            fontWeight: 700,
+                            transform: 'translate(12px, -9px) scale(0.85)',
+                            '&.Mui-focused': {
+                                color: 'primary.main',
+                            }
+                        }}
+                    >
                         {label}
                     </InputLabel>
                     <Select
@@ -34,16 +49,50 @@ const SelectInput: React.FC<SelectInputProps> = ({ name, label, options, ...othe
                         onChange={(val) => onChange(val?.value)}
                         onBlur={onBlur}
                         ref={ref}
+                        menuPortalTarget={document.body}
                         styles={{
                             control: (base, state) => ({
                                 ...base,
-                                borderColor: fieldState.error ? '#d32f2f' : (state.isFocused ? '#6366f1' : 'rgba(0, 0, 0, 0.23)'),
-                                boxShadow: state.isFocused ? (fieldState.error ? '0 0 0 1px #d32f2f' : '0 0 0 1px #6366f1') : 'none',
+                                backgroundColor: alpha(theme.palette.background.paper, 0.5),
+                                borderColor: fieldState.error
+                                    ? theme.palette.error.main
+                                    : (state.isFocused ? theme.palette.primary.main : theme.palette.divider),
+                                boxShadow: state.isFocused ? `0 0 0 1px ${theme.palette.primary.main}` : 'none',
                                 '&:hover': {
-                                    borderColor: fieldState.error ? '#d32f2f' : '#333333',
+                                    borderColor: theme.palette.primary.main,
                                 },
-                                padding: '8.5px 14px',
-                                borderRadius: '8px',
+                                padding: '6px 4px',
+                                borderRadius: '12px',
+                                backdropFilter: 'blur(10px)',
+                            }),
+                            menu: (base) => ({
+                                ...base,
+                                backgroundColor: theme.palette.background.paper,
+                                borderRadius: '12px',
+                                border: `1px solid ${theme.palette.divider}`,
+                                boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
+                                overflow: 'hidden',
+                            }),
+                            menuPortal: (base) => ({
+                                ...base,
+                                zIndex: 9999,
+                            }),
+                            option: (base, state) => ({
+                                ...base,
+                                backgroundColor: state.isSelected
+                                    ? theme.palette.primary.main
+                                    : (state.isFocused ? alpha(theme.palette.primary.main, 0.1) : 'transparent'),
+                                color: state.isSelected ? '#ffffff' : theme.palette.text.primary,
+                                '&:active': {
+                                    backgroundColor: theme.palette.primary.main,
+                                },
+                                fontWeight: 600,
+                                padding: '12px 16px',
+                            }),
+                            singleValue: (base) => ({
+                                ...base,
+                                color: theme.palette.text.primary,
+                                fontWeight: 600,
                             }),
                         }}
                         {...otherProps}
